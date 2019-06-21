@@ -5,20 +5,21 @@ interface, and stored in the browser's [local storage](https://developer.mozilla
 
 ![screenshot](screenshot.png)
 
+## Requirements
+
+* [MQTT server with websockets enabled](http://www.steves-internet-guide.com/mqtt-websockets/)
+* A [yaml file describing the devices to control](./src/assets/devices.yaml). This should be available over HTTP(s) somewhere. __You will need to create this file and host it somewhere.__
+* Some sort of service that controls the switches (see switch topics below)
+
+## Running Otto
+
+```
+docker run --rm -p 8080:80 dougg/otto
+```
+
 ## Development server
 
 Run `make up logs` to bring otto up and point a browser to http://localhost:4200/
-
-## Build the Docker image
-
-Run `docker build`
-
-
-Requirements:
-
-* [MQTT server with websockets enabled](http://www.steves-internet-guide.com/mqtt-websockets/)
-* A [yaml file describing the devices to control](./src/assets/devices.yaml). This should be available over HTTP(s) somewhere
-* Some sort of service that controls the switches (see switch topics below)
 
 ## Switch Topics
 
@@ -34,7 +35,3 @@ This use of "set" and "state" messages is compatible with [Home Assistant](https
 ## Development server
 
 Run `make up logs` to bring otto up and point a browser to http://localhost:4200/
-
-## Build the Docker image
-
-Run `docker build`
