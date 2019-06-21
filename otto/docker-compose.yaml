@@ -12,3 +12,7 @@ services:
     volumes:
       - ./:/otto
       - node_modules:/otto/node_modules
+
+volumes:
+    node_modules:
+      driver: local
