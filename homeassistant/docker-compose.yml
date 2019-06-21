@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+
+  # uses port 8123
+  # https://raspberrypi:8123
+  homeassistant:
+    restart: always
+    image: homeassistant/raspberrypi3-homeassistant
+
+    volumes:
+      - /data/homeassistant/config:/config
+      - /data/homeassistant/shared:/shared
+      - /etc/localtime:/etc/localtime:ro
+
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+      - /dev/ttyUSB1:/dev/ttyUSB1
+      - /dev/ttyACM0:/dev/ttyACM0
+
+    network_mode: host
+    privileged: true
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+  mosquitto:
+    image: eclipse-mosquitto
+    restart: always
+    network_mode: host
+    volumes:
+      - /data/mosquitto/data:/mosquitto/data
+      - /data/mosquitto/config:/mosquitto/config
+      - /etc/ssl/certs:/etc/ssl/certs
+
+  snips:
+    build: snips
+    restart: always
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev/snd:/dev/snd
+      - /data/snips/assistant:/usr/share/snips/assistant
+      - /data/snips/snips.toml:/etc/snips.toml
+      - /usr/share/alsa/alsa.conf:/usr/share/alsa/alsa.conf
