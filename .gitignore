@@ -1,0 +1,6 @@
+**/*.pyc
+\#*
+.#*
+**/*linux-x64
+**/node_modules
+**/dist

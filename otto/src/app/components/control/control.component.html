@@ -1,0 +1,31 @@
+<div class="card">
+  <header class="card-header">
+    <p class="card-header-title">
+      Control Panel
+    </p>
+  </header>
+  <div class="card-content">
+    <div class="content">
+
+
+      <ng-container *ngFor="let device of devices">
+
+        <p>
+          <a class="button is-left" (click)="action(device)">
+            <span [ngClass]="{'has-text-danger': deviceService.isOn(device), 'has-text-grey': ! deviceService.isOn(device) }">
+
+              <fa-icon icon="power-off" *ngIf="! device.isLoading"></fa-icon>
+              <fa-icon [icon]="['fas', 'spinner']" [pulse]="true" *ngIf="device.isLoading"></fa-icon>
+            </span>
+            &nbsp; {{device.description}}
+          </a>
+        </p>
+
+      </ng-container>
+
+
+    </div>
+  </div>
+  <footer class="card-footer">
+  </footer>
+</div>
