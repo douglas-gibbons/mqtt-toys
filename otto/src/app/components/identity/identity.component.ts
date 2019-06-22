@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { mqttSettings, deviceSettings } from '../../../environments/environment';
 import { MqttService, IMqttMessage } from 'ngx-mqtt';
 import { DeviceService } from '../../services/device.service'
@@ -8,7 +8,7 @@ import { DeviceService } from '../../services/device.service'
   templateUrl: './identity.component.html',
   styleUrls: ['./identity.component.scss']
 })
-export class IdentityComponent implements OnInit {
+export class IdentityComponent {
 
   mqttSettings = mqttSettings;
   deviceSettings = deviceSettings;
@@ -19,24 +19,18 @@ export class IdentityComponent implements OnInit {
   constructor(
     private mqttService: MqttService,
     private deviceService: DeviceService,
-  ) {
-
-  }
-
-  ngOnInit() {
-  }
+  ) {}
 
   saveSetting(fieldName: string) {
-    console.log("Saving setting for " + fieldName);
     localStorage.setItem('mqtt.' + fieldName, mqttSettings[fieldName]);
   }
 
-  saveDeviceSetting(fieldName: string) {
+  saveDeviceSetting(fieldName) {
     localStorage.setItem('device.' + fieldName, deviceSettings[fieldName]);
   }
 
   refresh() {
-    this.deviceService.refreshDevices();
+    this.deviceService.refresh();
     return false;
   }
 }

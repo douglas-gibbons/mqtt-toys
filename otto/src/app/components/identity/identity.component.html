@@ -1,22 +1,5 @@
 <div class="card">
-  <header class="card-header">
-    <p class="card-header-title">
-      Device Configuration
-    </p>
-  </header>
-  <div class="card-content">
-    <div class="content">
 
-      <div class="field">
-        <label class="label">Device Url</label>
-        <div class="control">
-          <input class="input" type="text" [(ngModel)]="deviceSettings.url" (ngModelChange)="saveDeviceSetting('url')">
-        </div>
-      </div>
-
-    </div>
-  </div>
-  <hr />
   <header class="card-header">
     <p class="card-header-title">
       MQTT Connection
@@ -69,8 +52,15 @@
         </div>
       </div>
 
+      <div class="field">
+        <label class="label">Discovery Prefix</label>
+        <div class="control">
+          <input class="input" type="text" [(ngModel)]="deviceSettings.prefix" (ngModelChange)="saveDeviceSetting('prefix')">
+        </div>
+      </div>
+
     </div>
     <footer class="card-footer">
-      <a href="#" (click)="refresh()" class="card-footer-item">Save</a>
+      <a href="#" (click)="refresh()" class="card-footer-item">Connect</a>
     </footer>
   </div>

@@ -33,5 +33,5 @@ export const mqttSettings: IMqttServiceOptions = {
 };
 
 export const deviceSettings = {
-  url: localStorage.getItem('device.url') || 'assets/devices.yaml',
+  prefix: localStorage.getItem('device.prefix') || 'homeassistant',
 };

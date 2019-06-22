@@ -3,15 +3,32 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subscription } from 'rxjs';
 import { MqttService, IMqttMessage, MqttConnectionState } from 'ngx-mqtt';
 import { mqttSettings, deviceSettings } from '../../environments/environment';
-let yaml = require('js-yaml');
 import { MessageService, Message, Level } from './message.service';
+
+export class Device {
+  constructor() { }
+  public name: string;
+  public object: string;
+  public type: string;
+  public configTopic: string;
+  public stateTopic: string;
+  public commandTopic: string;
+  public unitOfMeasurement: string;
+  public state: string;
+  public isLoading: boolean = false;
+
+  public isOn() {
+    return this.state == "ON";
+  }
+
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeviceService {
 
-  private devices;
+  private devices: Device[] = [];
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -20,9 +37,7 @@ export class DeviceService {
     private messageService: MessageService,
   ) {
     this.monitorMqttStatus();
-    this.getDevices().subscribe(devices => {
-      this.mqttService.connect(mqttSettings);
-    });
+    this.mqttService.connect(mqttSettings);
   }
 
   private monitorMqttStatus() {
@@ -37,11 +52,6 @@ export class DeviceService {
         this.message(Level.Info, "Connected to MQTT broker")
         this.subscribeDevices();
       });
-    // this.mqttService.onReconnect.subscribe(
-    //   () => {
-    //     this.message(Level.Info, "Re-connected to MQTT broker")
-    //     this.subscribeDevices();
-    //   });
   }
 
   private message(level: Level, text: string) {
@@ -49,82 +59,72 @@ export class DeviceService {
       new Message(level, text)
     )
   }
-  // Refreshes the device list and re-connect to MQTT to trgger re-subscription
-  // for new device list
-  public refreshDevices() {
+
+  // Refresh connection
+  public refresh() {
+    this.devices.length = 0;
     this.messageService.clear();
-    this.devices = undefined;
-    this.getDevices().subscribe(devices => {
-      this.mqttService.disconnect(false);
-      this.mqttService.connect(mqttSettings);
-    });
+    this.mqttService.disconnect();
+    this.mqttService.connect(mqttSettings);
   }
 
-  // Returns the devices only fetching them if we don't already have them.
   public getDevices() {
-    return new Observable(observer => {
-      if (this.devices != undefined) {
-        observer.next(this.devices);
-        observer.complete();
-      } else {
-        this.fetchDevices(observer);
-      }
-    });
-  }
-
-  // fetches devices from the deviceUrl
-  private fetchDevices(observer) {
-    this.http.get(deviceSettings.url, { responseType: 'text' }).subscribe(
-      devicesYaml => {
-        try {
-          let devicesObj = yaml.safeLoad(devicesYaml);
-          this.devices = devicesObj;
-          this.message(Level.Info, "Loaded devices from " + deviceSettings.url);
-          observer.next(this.devices);
-          observer.complete();
-        } catch (e) {
-          this.message(Level.Warning, "Failed to fetch device list: " + e.message)
-          observer.error(e);
-        }
-      },
-      e => {
-        this.message(Level.Warning, "Failed to fetch device list: " + e.message)
-        observer.error(e);
-      }
-    );
+    return this.devices;
   }
 
   // Run whenever a connection is established
-  subscribeDevices() {
+  private subscribeDevices(): void {
 
-    // Remove any previous subscriptions
+    // Remove any previous device subscriptions
     for (let subs of this.subscriptions) {
       subs.unsubscribe();
     }
     this.subscriptions = [];
 
-    console.log("Connection established to MQTT broker, so subscribing to topics")
-    for (let device of this.devices) {
+    let configTopic = deviceSettings.prefix + '/+/+/config';
+    let subs = this.mqttService.observeRetained(configTopic).subscribe((message: IMqttMessage) => {
 
-      let configTopic = device.topic + '/config';
-      let stateTopic = device.topic + '/state';
-      let commandTopic = device.topic + '/set';
+      let discoveryTopic = message.topic.split('/');
+      let prefix = discoveryTopic[0];
+      let component = discoveryTopic[1];
+      let object = discoveryTopic[2];
+      let payload = JSON.parse(message.payload.toString());
 
+      let device = new Device();
+      device.type = component;
+      device.object = object;
+      device.name = payload.name;
+      device.stateTopic = payload.state_topic;
+      device.commandTopic = payload.command_topic;
+      device.unitOfMeasurement = payload.unit_of_measurement;
 
-      // Send config
-      // let configMessage =
-      //   '{"name": "' + device.description + '", "state_topic": "' + stateTopic + '", "command_topic": "' + commandTopic + '"}'
-      // this.publish(configTopic, configMessage, false);
+      this.pushDevice(device);
+      this.subscribeDevice(device);
 
-      // Listen for state changes
-      let subs = this.mqttService.observeRetained(stateTopic).subscribe((message: IMqttMessage) => {
+    });
+    this.subscriptions.push(subs);
+  }
 
-        // console.log(message);
+  // Adds a device to the list of devices if it's not there already
+  private pushDevice(device) {
+    for (let d of this.devices) {
+      if (d.commandTopic == device.commandTopic) {
+        return
+      }
+    }
+    this.devices.push(device);
+  }
 
-        device.state = message.payload.toString();
-        device.isLoading = false;
-      },
-        e => this.message(Level.Warning, e.message)
+  private subscribeDevice(device: Device): void {
+    if (device.stateTopic != undefined) {
+      let subs = this.mqttService.observeRetained(device.stateTopic).subscribe(
+        (message: IMqttMessage) => {
+          device.state = message.payload.toString();
+          device.isLoading = false;
+        },
+        e => {
+          this.message(Level.Warning, e.message);
+        }
       );
       this.subscriptions.push(subs);
     }
@@ -135,18 +135,13 @@ export class DeviceService {
   }
 
   public turnOff(device) {
-    let commandTopic = device.topic + '/set';
     device.isLoading = true;
-    this.publish(commandTopic, "OFF", false);
+    this.publish(device.commandTopic, "OFF", false);
 
   }
   public turnOn(device) {
-    let commandTopic = device.topic + '/set';
     device.isLoading = true;
-    this.publish(commandTopic, "ON", false);
-  }
-  public isOn(device) {
-    return device.state == "ON";
+    this.publish(device.commandTopic, "ON", false);
   }
 
 }

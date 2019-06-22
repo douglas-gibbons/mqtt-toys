@@ -1,15 +1,14 @@
 # Otto
 
-Otto is a simple web application to control switches using MQTT. Connection setttings are configured through the web
-interface, and stored in the browser's [local storage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API).
+Otto is a simple web application to control switches and view sensor output using MQTT. Connection settings are configured through the web interface, and stored in the browser's [local storage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API).
 
 ![screenshot](screenshot.png)
 
 ## Requirements
 
 * [MQTT server with websockets enabled](http://www.steves-internet-guide.com/mqtt-websockets/)
-* A [yaml file describing the devices to control](./src/assets/devices.yaml). This should be available over HTTP(s) somewhere. __You will need to create this file and host it somewhere.__
 * Some sort of service that controls the switches (see switch topics below)
+* Retained topics for device discovery. See [home assistant documentation](https://www.home-assistant.io/docs/mqtt/discovery/) for format of auto discovery messages.
 
 ## Running Otto
 
@@ -17,21 +16,23 @@ interface, and stored in the browser's [local storage](https://developer.mozilla
 docker run --rm -p 8080:80 dougg/otto
 ```
 
-## Development server
+## Device Configuration and Messages
 
-Run `make up logs` to bring otto up and point a browser to http://localhost:4200/
+The interface reads [discovery](https://www.home-assistant.io/docs/mqtt/discovery/) messages from the MQTT broker and users these to configure what devices to display and control.
 
-## Switch Topics
+For example, suppose we configure otto to use a "discover prefix" of "homeassistant", and we publish a retained message like this:
 
-Base topics are configured in the YAML file, but the messages are expected to follow a specific format. For example, assume the base MQTT topic for device is `homeassistant/switch/sprinkler`:
+* topic: `homeassistant/switch/sprinkler/config`
+* payload: `{"name": "Sprinkler system", "state_topic": "homeassistant/switch/sprinkler/state", "command_topic": "homeassistant/switch/sprinkler/set"}`
 
-* Clicking on the web interface button to turn the sprinkler on will send a message on topic `homeassistant/switch/sprinkler/set` with a value of "ON"
-* Once the sprinkler has been turned on, whatever is controlling it is expected to set `homeassistant/switch/sprinkler/state` to `ON` and set the retain flag on that message
+Clicking on the web interface button to turn the sprinkler on will send a message on topic `homeassistant/switch/sprinkler/set` with a payload of `ON`
+
+Once the sprinkler has been turned on, whatever is controlling it is expected to set `homeassistant/switch/sprinkler/state` to `ON` and set the retain flag on that messag
 
 Likewise for turning our example sprinkler off.
 
-This use of "set" and "state" messages is compatible with [Home Assistant](https://www.home-assistant.io/components/switch.mqtt/) among others.
+Use of "set" and "state" messages is compatible with what [Home Assistant](https://www.home-assistant.io/components/switch.mqtt/) expects.
 
-## Development server
+## Development Environment
 
 Run `make up logs` to bring otto up and point a browser to http://localhost:4200/

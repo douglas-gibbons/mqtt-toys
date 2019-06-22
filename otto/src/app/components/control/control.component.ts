@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
-import { DeviceService } from '../../services/device.service'
+import { DeviceService, Device } from '../../services/device.service'
 
 @Component({
   selector: 'app-control',
@@ -9,26 +9,22 @@ import { DeviceService } from '../../services/device.service'
 })
 export class ControlComponent implements OnInit {
 
-  private devices;
+  private devices: Device[];
 
   constructor(
     private deviceService: DeviceService,
   ) { }
 
   ngOnInit() {
-    this.deviceService.getDevices().subscribe(
-      (devices) => {
-        this.devices = devices
-      });
+    this.devices = this.deviceService.getDevices();
   }
 
   action(device) {
-    if (this.deviceService.isOn(device)) {
+    if (device.isOn()) {
       this.deviceService.turnOff(device);
     } else {
       this.deviceService.turnOn(device);
     }
   }
-
 
 }
