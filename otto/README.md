@@ -12,6 +12,10 @@ Otto is a simple web application to control switches and view sensor output usin
 
 ## Running Otto
 
+Just navigate to https://otto.zenly.xyz/
+
+All user data is kept in the browser, so there's no need to install the app yourself, but if you _do_ want to:
+
 ```
 docker run --rm -p 8080:80 dougg/otto
 ```
