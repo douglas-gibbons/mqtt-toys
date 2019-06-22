@@ -2,7 +2,7 @@
 
 Otto is a simple web application to control switches and view sensor output using MQTT. Connection settings are configured through the web interface, and stored in the browser's [local storage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API).
 
-![screenshot](screenshot.png)
+![screenshot](https://raw.githubusercontent.com/douglas-gibbons/mqtt-toys/master/otto/screenshot.png)
 
 ## Requirements
 
