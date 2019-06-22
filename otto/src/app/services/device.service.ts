@@ -36,13 +36,17 @@ export class DeviceService {
     private mqttService: MqttService,
     private messageService: MessageService,
   ) {
-    this.mqttService.connect(mqttSettings);
-    this.monitorMqttStatus();
+
+    try {
+      this.mqttService.connect(mqttSettings);
+      this.monitorMqttStatus();
+    } catch(e) {
+      this.message(Level.Danger, e);
+    }
+
   }
 
   private monitorMqttStatus() {
-    console.log(this.mqttService);
-
     this.mqttService.onError.subscribe(
       event => {
         this.message(Level.Warning, "MQTT connection failure");
@@ -56,7 +60,7 @@ export class DeviceService {
 
     this.mqttService.onOffline.subscribe(
       () => {
-        this.message(Level.Warning, "MQTT connection failure")
+        this.message(Level.Warning, "MQTT connection failure (offline)")
         this.subscribeDevices();
       });
   }

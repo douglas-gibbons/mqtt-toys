@@ -19,7 +19,7 @@ export class IdentityComponent {
   constructor(
     private mqttService: MqttService,
     private deviceService: DeviceService,
-  ) {}
+  ) { }
 
   saveSetting(fieldName: string) {
     localStorage.setItem('mqtt.' + fieldName, mqttSettings[fieldName]);
