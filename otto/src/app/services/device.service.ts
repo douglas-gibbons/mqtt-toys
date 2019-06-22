@@ -40,7 +40,7 @@ export class DeviceService {
     try {
       this.mqttService.connect(mqttSettings);
       this.monitorMqttStatus();
-    } catch(e) {
+    } catch (e) {
       this.message(Level.Danger, e);
     }
 
@@ -118,7 +118,7 @@ export class DeviceService {
 
   // Adds a device to the list of devices, replacing it if it's already in the array
   private pushDevice(device) {
-   for (let i = 0; i++; i < this.devices.length) {
+    for (let i = 0; i < this.devices.length; i++) {
       if (this.devices[i].commandTopic == device.commandTopic) {
         this.devices[i] = device;
         return
