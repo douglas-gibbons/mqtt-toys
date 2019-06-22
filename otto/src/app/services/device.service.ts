@@ -36,20 +36,27 @@ export class DeviceService {
     private mqttService: MqttService,
     private messageService: MessageService,
   ) {
-    this.monitorMqttStatus();
     this.mqttService.connect(mqttSettings);
+    this.monitorMqttStatus();
   }
 
   private monitorMqttStatus() {
+    console.log(this.mqttService);
+
     this.mqttService.onError.subscribe(
       event => {
         this.message(Level.Warning, "MQTT connection failure");
       }
     );
-
     this.mqttService.onConnect.subscribe(
       () => {
         this.message(Level.Info, "Connected to MQTT broker")
+        this.subscribeDevices();
+      });
+
+    this.mqttService.onOffline.subscribe(
+      () => {
+        this.message(Level.Warning, "MQTT connection failure")
         this.subscribeDevices();
       });
   }
@@ -64,7 +71,7 @@ export class DeviceService {
   public refresh() {
     this.devices.length = 0;
     this.messageService.clear();
-    this.mqttService.disconnect();
+    // mqttService.connect disconnects if it is already connected
     this.mqttService.connect(mqttSettings);
   }
 
@@ -105,10 +112,11 @@ export class DeviceService {
     this.subscriptions.push(subs);
   }
 
-  // Adds a device to the list of devices if it's not there already
+  // Adds a device to the list of devices, replacing it if it's already in the array
   private pushDevice(device) {
-    for (let d of this.devices) {
-      if (d.commandTopic == device.commandTopic) {
+   for (let i = 0; i++; i < this.devices.length) {
+      if (this.devices[i].commandTopic == device.commandTopic) {
+        this.devices[i] = device;
         return
       }
     }
