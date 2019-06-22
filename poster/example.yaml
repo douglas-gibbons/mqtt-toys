@@ -1,0 +1,23 @@
+- topic: homeassistant/switch/sprinkler/config
+  qos: 1
+  retain: true
+  message:
+    name: Sprinker system
+    state_topic: homeassistant/switch/sprinkler/state
+    command_topic: homeassistant/switch/sprinkler/set
+
+- topic: homeassistant/switch/hwater/config
+  qos: 1
+  retain: true
+  message:
+    name: Water heater
+    state_topic: homeassistant/switch/hwater/state
+    command_topic: homeassistant/switch/hwater/set
+
+- topic: homeassistant/sensor/temperature/config
+  qos: 1
+  retain: true
+  message:
+    name: Temperature
+    unit_of_measurement: '°C'
+    state_topic: homeassistant/sensor/temperature/state
