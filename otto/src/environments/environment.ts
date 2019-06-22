@@ -27,7 +27,7 @@ export const mqttSettings: IMqttServiceOptions = {
   username: localStorage.getItem('mqtt.username') || "user",
   password: localStorage.getItem('mqtt.password') || "password",
   clientId: Guid.raw(),
-  protocol:  localStorage.getItem('mqtt.protocol') as Protocol || 'ws',
+  protocol:  localStorage.getItem('mqtt.protocol') as Protocol || 'wss',
   reconnectPeriod: 500,
   connectTimeout: 10000
 };
