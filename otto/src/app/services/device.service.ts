@@ -120,7 +120,7 @@ export class DeviceService {
   // Adds a device to the list of devices, replacing it if it's already in the array
   private pushDevice(device) {
     for (let i = 0; i < this.devices.length; i++) {
-      if (this.devices[i].commandTopic == device.commandTopic) {
+      if (this.devices[i].stateTopic == device.stateTopic) {
         this.devices[i] = device;
         return
       }
